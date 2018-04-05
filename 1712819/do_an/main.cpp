@@ -44,6 +44,27 @@ void doc_1_sv(FILE* fp, SV& x)
 	doc_1_tt(x.sothich1, fp);
 	fgetws(x.sothich2, 1001, fp);
 }
+int dem_sv(FILE* fp)
+{
+	wchar_t s[1600];
+	int dem = 0;
+	while (feof(fp)==NULL) {
+		fgetws(s, 1600, fp);
+		dem++;
+	}
+	return dem-1;
+}
+SV* doc_mang_sv(FILE* fp)
+{
+	int n = dem_sv(fp);
+	fseek(fp, 0, 0);
+	SV* a =(SV*)malloc(n*sizeof(SV));
+	for (int i = 0; i < 10; i++)
+	{
+		doc_1_sv(fp, a[i]);
+	}
+	return  a;
+}
 void main()
 {
 	_setmode(_fileno(stdout), _O_U16TEXT); 
@@ -52,17 +73,9 @@ void main()
 	fp = _wfopen(L"do_an_ktlt.csv", L" r, ccs = UTF-8");
 	if (fp == NULL)
 		wprintf(L"mo file that bai");
-	SV a;
-	doc_1_sv(fp, a);
-	wprintf(L"%ls", a.mssv);
-	wprintf(L"%ls", a.name);
-	wprintf(L"%ls", a.khoa);
-	wprintf(L"%d", a.nam);
-	wprintf(L"%ls", a.birth);
-	wprintf(L"%ls", a.hinh);
-	wprintf(L"%ls", a.mota);
-	wprintf(L"%ls", a.sothich1);
-	wprintf(L"%ls", a.sothich2);
+	SV* a = doc_mang_sv(fp);
+	wprintf(L"%ls", a[2].mssv);
+	free(a);
 	fclose(fp);
 	_getch();
 }
