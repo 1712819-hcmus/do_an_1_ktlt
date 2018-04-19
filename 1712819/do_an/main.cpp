@@ -17,17 +17,33 @@ struct sinhvien {
 	wchar_t sothich2[1001];
 };
 typedef struct sinhvien SV;
-wchar_t* doc_1_tt(wchar_t *s,FILE* fp)
+wchar_t* doc_1_tt(wchar_t *s, FILE* fp)
 {
 	int i = 0;
-	wchar_t c='c';
-	while (c!= ',')
+	wchar_t c;
+	c = fgetwc(fp);
+	if (c != L'"')// trường hợp : nội dung1, nội dung 2
 	{
-		c =fgetwc(fp);
-		s[i]= c;
-		i++;
+		while (c != L',' && c != '\n')
+		{
+			s[i] = c;
+			c = fgetwc(fp);
+			i++;
+		}
+		s[i] = L'\0';
 	}
-	s[i-1] = L'\0';
+	else// trường hợp: "nội dung 1","nội dung 2"
+	{
+		c = fgetwc(fp);
+		while (c != L'"' && c != '\n')
+		{
+			s[i] = c;
+			c = fgetwc(fp);
+			i++;
+		}
+		s[i] = L'\0';
+		c = fgetwc(fp);// đọc lun dấu ,
+	}
 	return s;
 }
 void doc_1_sv(FILE* fp, SV& x)
@@ -40,7 +56,7 @@ void doc_1_sv(FILE* fp, SV& x)
 	doc_1_tt(x.hinh, fp);
 	doc_1_tt(x.mota, fp);
 	doc_1_tt(x.sothich1, fp);
-	fgetws(x.sothich2, 1001, fp);
+	doc_1_tt(x.sothich2, fp);
 }
 int dem_sv(FILE* fp)
 {
