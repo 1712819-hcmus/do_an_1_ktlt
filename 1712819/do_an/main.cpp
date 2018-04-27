@@ -6,67 +6,85 @@
 #include <stdlib.h> 
 #include <wchar.h> 
 struct sinhvien {
-	wchar_t mssv[11];
-	wchar_t name[31];
-	wchar_t khoa[31];
-	wchar_t mail[101];
-	wchar_t birth[15];
-	wchar_t hinh[15];
-	wchar_t mota[1001];
-	wchar_t sothich1[1001];
-	wchar_t sothich2[1001];
+	wchar_t *mssv;
+	wchar_t *name;
+	wchar_t *khoa;
+	wchar_t *mail;
+	wchar_t *birth;
+	wchar_t *hinh;
+	wchar_t *mota;
+	wchar_t *sothich1;
+	wchar_t *sothich2;
 };
 typedef struct sinhvien SV;
-wchar_t* doc_1_tt(wchar_t *s, FILE* fp)
+int dem_so_kt_chuoi(FILE* fp)
 {
 	int i = 0;
+	int pos = ftell(fp), a = 0;
 	wchar_t c;
 	c = fgetwc(fp);
 	if (c != L'"')// trường hợp : nội dung1, nội dung 2
 	{
+		a = 0;
 		while (c != L',' && c != '\n')
 		{
-			s[i] = c;
 			c = fgetwc(fp);
 			i++;
 		}
-		s[i] = L'\0';
 	}
 	else// trường hợp: "nội dung 1","nội dung 2"
 	{
+		a = 1;
 		c = fgetwc(fp);
 		while (c != L'"' && c != '\n')
 		{
-			s[i] = c;
 			c = fgetwc(fp);
 			i++;
 		}
-		s[i] = L'\0';
-		c = fgetwc(fp);// đọc lun dấu ,
 	}
+	fseek(fp, pos + a, 0);
+	return i;
+}
+wchar_t* doc_1_tt(FILE* fp)
+{
+	int a = dem_so_kt_chuoi(fp);
+	wchar_t *s = (wchar_t*)malloc((a) * sizeof(wchar_t));
+	for (int i = 0; i < a; i++)
+	{
+		s[i] = fgetwc(fp);
+	}
+	s[a] = L'\0';
+	wchar_t c = fgetwc(fp);
+	 if (c == L'\0')
+	{
+		 int pos = ftell(fp);
+		 fseek(fp, pos - 1, 0);
+	}
+	 if (c == L'"')
+		 c = fgetwc(fp);
 	return s;
 }
 void doc_1_sv(FILE* fp, SV& x)
 {
-	doc_1_tt(x.mssv, fp);
-	doc_1_tt(x.name, fp);
-	doc_1_tt(x.khoa, fp);
-	doc_1_tt(x.mail, fp);
-	doc_1_tt(x.birth, fp);
-	doc_1_tt(x.hinh, fp);
-	doc_1_tt(x.mota, fp);
-	doc_1_tt(x.sothich1, fp);
-	doc_1_tt(x.sothich2, fp);
+	x.mssv = doc_1_tt(fp);
+	x.name = doc_1_tt(fp);
+	x.khoa = doc_1_tt(fp);
+	x.mail = doc_1_tt(fp);
+	x.birth = doc_1_tt(fp);
+	x.hinh = doc_1_tt(fp);
+	x.mota = doc_1_tt(fp);
+	x.sothich1 = doc_1_tt(fp);
+	x.sothich2 = doc_1_tt(fp);
 }
 int dem_sv(FILE* fp)
 {
 	wchar_t s[1600];
 	int dem = 0;
-	while (feof(fp)==NULL) {
+	while (feof(fp) == NULL) {
 		fgetws(s, 1600, fp);
 		dem++;
 	}
-	return dem-1;
+	return dem - 1;
 }
 SV* doc_mang_sv(FILE* fp,int &n)
 {
